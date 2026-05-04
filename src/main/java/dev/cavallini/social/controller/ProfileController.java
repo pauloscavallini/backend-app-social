@@ -2,6 +2,7 @@ package dev.cavallini.social.controller;
 
 import dev.cavallini.social.domain.user.LoginResponseDTO;
 import dev.cavallini.social.domain.user.User;
+import dev.cavallini.social.domain.user.UserProfileDTO;
 import dev.cavallini.social.repositories.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +18,16 @@ public class ProfileController {
     private final UserRepository userRepository;
 
     @GetMapping("/{username}")
-    public ResponseEntity getProfile(@PathVariable @Valid String username) {
-        UserDetails user = (User) userRepository.findByLogin(username);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserProfileDTO> getProfile(@PathVariable @Valid String username) {
+        User user = (User) userRepository.findByLogin(username);
+
+        UserProfileDTO profileDTO = new UserProfileDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getDisplayname()
+        );
+
+        return ResponseEntity.ok(profileDTO);
     }
 
 }

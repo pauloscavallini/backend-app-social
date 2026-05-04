@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("posts")
@@ -28,7 +29,14 @@ public class PostController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostResponseDTO> getPost(@PathVariable @Valid String postId) {
+        PostResponseDTO post = repository.findPostWithAuthorById(postId);
+        System.out.println(post);
+        return ResponseEntity.ok(post);
+    }
+
+    @GetMapping("/author/{userId}")
     public ResponseEntity<List<PostResponseDTO>> getUserPosts(@PathVariable @Valid String userId) {
         List<PostResponseDTO> postResponseDTOS = repository.findPostsByAuthorId(userId);
         return ResponseEntity.ok(postResponseDTOS);

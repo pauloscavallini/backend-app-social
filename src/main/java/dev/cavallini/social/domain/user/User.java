@@ -26,6 +26,10 @@ public class User implements UserDetails {
 
     private UserRole role;
 
+    private String displayname;
+
+    private String profile_picture_url;
+
     public User(String login, String password, UserRole role) {
         this.login = login;
         this.password = password;
