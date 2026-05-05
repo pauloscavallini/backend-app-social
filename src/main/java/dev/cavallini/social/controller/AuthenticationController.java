@@ -43,7 +43,8 @@ public class AuthenticationController {
             return ResponseEntity.status(401).body(new ErrorResponseDTO("Authentication error"));
         }
 
-        var token = tokenService.generateToken((User) auth.getPrincipal());
+        User user = (User) auth.getPrincipal();
+        var token = tokenService.generateToken(user);
 
         Cookie cookie = new Cookie("access_token", token);
         cookie.setHttpOnly(true);
@@ -53,7 +54,9 @@ public class AuthenticationController {
 
         response.addCookie(cookie);
 
-        return ResponseEntity.ok(new LoginResponseDTO("Successfully logged-in"));
+        UserProfileDTO userProfileDTO = new UserProfileDTO(user.getId(), user.getUsername(), user.getDisplayname(), user.getProfile_picture_url());
+
+        return ResponseEntity.ok(new LoginResponseDTO("Successfully logged-in", userProfileDTO));
     }
 
     @PostMapping("/register")

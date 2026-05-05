@@ -54,6 +54,6 @@ public class PostController {
 
         return ResponseEntity.status(201).body(new FormattedPostResponseDTO(
                 "Post created successfully",
-                new PostResponseDTO(newPost, user.getUsername())));
+                new PostResponseDTO(newPost, user.getUsername(), user.getDisplayname())));
     }
 }

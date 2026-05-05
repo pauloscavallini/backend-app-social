@@ -24,7 +24,8 @@ public class ProfileController {
         UserProfileDTO profileDTO = new UserProfileDTO(
                 user.getId(),
                 user.getUsername(),
-                user.getDisplayname()
+                user.getDisplayname(),
+                user.getProfile_picture_url()
         );
 
         return ResponseEntity.ok(profileDTO);
