@@ -1,14 +1,10 @@
 package dev.cavallini.social.controller;
 
-import dev.cavallini.social.domain.post.FormattedPostResponseDTO;
-import dev.cavallini.social.domain.post.Post;
 import dev.cavallini.social.domain.post.PostRequestDTO;
 import dev.cavallini.social.domain.post.PostResponseDTO;
 import dev.cavallini.social.domain.user.User;
 import dev.cavallini.social.infra.dto.ApiSuccessDTO;
-import dev.cavallini.social.repositories.PostRepository;
 import dev.cavallini.social.services.PostService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,27 +20,22 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:5173")
 public class PostController {
 
-    private final PostRepository repository;
-
     private final PostService postService;
 
 
     @GetMapping("/all")
     public ResponseEntity<List<PostResponseDTO>> getPosts() {
-    List<PostResponseDTO> posts = repository.findAllWithAuthorName();
-        return ResponseEntity.ok(posts);
+        return ResponseEntity.ok(postService.getAllPosts());
     }
 
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDTO> getPost(@PathVariable @Valid String postId) {
-        PostResponseDTO post = repository.findPostWithAuthorById(postId);
-        return ResponseEntity.ok(post);
+        return ResponseEntity.ok(postService.getPostById(postId));
     }
 
     @GetMapping("/author/{userId}")
     public ResponseEntity<List<PostResponseDTO>> getUserPosts(@PathVariable @Valid String userId) {
-        List<PostResponseDTO> postResponseDTOS = repository.findPostsByAuthorId(userId);
-        return ResponseEntity.ok(postResponseDTOS);
+        return ResponseEntity.ok(postService.getUserPosts(userId));
     }
 
     @PostMapping("/create")
@@ -67,14 +58,7 @@ public class PostController {
         User user = (User) authentication.getPrincipal();
         String authorId = user.getId();
 
-        Post post = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
-
-        if (!authorId.equals(post.getAuthor_id())) {
-            return ResponseEntity.status(403).body("Não pode excluir post alheio");
-        }
-
-        repository.deleteById(id);
+        postService.deleteById(authorId, id);
 
         return ResponseEntity.ok("Post " + id + " deletado com sucesso por " + authorId);
     }

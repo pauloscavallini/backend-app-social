@@ -2,6 +2,8 @@ package dev.cavallini.social.infra;
 
 import dev.cavallini.social.infra.dto.ApiErrorDTO;
 import dev.cavallini.social.infra.exceptions.InvalidPostException;
+import dev.cavallini.social.infra.exceptions.OperationNotAllowedException;
+import dev.cavallini.social.infra.exceptions.PostNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
@@ -33,7 +35,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidPostException.class)
-    public ResponseEntity<ApiErrorDTO> invalidPostExceptionHandler(InvalidPostException e) {
+    public ResponseEntity<ApiErrorDTO> invalidPostHandler(InvalidPostException e) {
         return ResponseEntity.badRequest().body(new ApiErrorDTO("Post deve possuir entre 1 e 100 caracteres"));
+    }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ApiErrorDTO> postNotFoundHandler(PostNotFoundException e) {
+        return ResponseEntity.status(404).body(new ApiErrorDTO("Nao encontrado"));
+    }
+
+    @ExceptionHandler(OperationNotAllowedException.class)
+    public ResponseEntity<ApiErrorDTO> operationNotAllowedHandler(OperationNotAllowedException e) {
+        return ResponseEntity.status(403).body(new ApiErrorDTO("Sem permissoes necessarias"));
     }
 }
