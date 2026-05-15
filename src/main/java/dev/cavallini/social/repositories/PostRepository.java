@@ -10,7 +10,8 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, String> {
     @Query("SELECT new dev.cavallini.social.domain.post.PostResponseDTO(p.id, p.author_id, p.content, p.created_at, u.login, u.displayname) " +
-            "FROM posts p JOIN users u ON p.author_id = u.id")
+            "FROM posts p JOIN users u ON p.author_id = u.id " +
+            "ORDER BY p.created_at DESC")
     List<PostResponseDTO> findAllWithAuthorName();
 
     @Query("SELECT new dev.cavallini.social.domain.post.PostResponseDTO(p.id, p.author_id, p.content, p.created_at, u.login, u.displayname) " +

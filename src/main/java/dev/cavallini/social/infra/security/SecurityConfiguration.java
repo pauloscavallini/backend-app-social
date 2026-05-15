@@ -35,8 +35,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/profiles/*").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/posts/*").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
@@ -60,7 +62,7 @@ public class SecurityConfiguration {
         authProvider.setUserDetailsService(authorizationService);
         authProvider.setPasswordEncoder(passwordEncoder());
 
-        authProvider.setHideUserNotFoundExceptions(false);
+//        authProvider.setHideUserNotFoundExceptions(false);
 
         return authProvider;
     }

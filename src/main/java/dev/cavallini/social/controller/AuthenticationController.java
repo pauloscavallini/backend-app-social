@@ -1,6 +1,7 @@
 package dev.cavallini.social.controller;
 
 import dev.cavallini.social.domain.user.*;
+import dev.cavallini.social.infra.dto.ApiErrorDTO;
 import dev.cavallini.social.infra.security.TokenService;
 import dev.cavallini.social.repositories.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -31,17 +32,7 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data, HttpServletResponse response) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.login(), data.password());
-        Authentication auth;
-
-        try {
-            auth = this.authenticationManager.authenticate(usernamePassword);
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(404).body(new ErrorResponseDTO("User not found"));
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(401).body(new ErrorResponseDTO("Incorrect username or password"));
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(401).body(new ErrorResponseDTO("Authentication error"));
-        }
+        var auth = this.authenticationManager.authenticate(usernamePassword);
 
         User user = (User) auth.getPrincipal();
         var token = tokenService.generateToken(user);
@@ -56,18 +47,35 @@ public class AuthenticationController {
 
         UserProfileDTO userProfileDTO = new UserProfileDTO(user.getId(), user.getUsername(), user.getDisplayname(), user.getProfile_picture_url());
 
-        return ResponseEntity.ok(new LoginResponseDTO("Successfully logged-in", userProfileDTO));
+        return ResponseEntity.ok(new LoginResponseDTO("Successfully logged in", userProfileDTO));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("access_token", null);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+        return ResponseEntity.ok("Successfully logged out");
     }
 
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody @Valid RegisterDTO data) {
-        if (this.userRepository.findByLogin(data.login()) != null) return ResponseEntity.badRequest().build();
+        if (this.userRepository.findByLogin(data.login()) != null)
+            return ResponseEntity.badRequest().body(new ApiErrorDTO("Usuario ja cadastrado"));
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        User newUser = new User(data.login(), encryptedPassword, data.role());
+
+        UserRole defaultRole = UserRole.USER;
+
+        User newUser = new User(
+            data.login(),
+            encryptedPassword,
+            defaultRole
+        );
 
         this.userRepository.save(newUser);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(201).build();
     }
 }
